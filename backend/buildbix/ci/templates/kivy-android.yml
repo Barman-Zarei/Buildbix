@@ -1,0 +1,29 @@
+# BUILDBIX CI template: kivy-android (v1)
+# STATUS: UNVERIFIED default
+# >>> REPLACE everything below the header with a workflow you have RUN SUCCESSFULLY on a real Kivy project.
+# >>> Keep the double-brace placeholders you want BUILDBIX to fill; then change the STATUS line to
+# >>> "# STATUS: VERIFIED <date> <link to the successful run>". BUILDBIX will never change anything except placeholders.
+name: BUILDBIX Android APK
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "{{python_version}}"
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf automake libtool libtool-bin pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev build-essential ccache {{extra_apt}}
+      - run: pip install buildozer cython
+      - name: Build APK
+        working-directory: {{workdir}}
+        run: buildozer -v android debug {{license_stdin}}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: buildbix-artifacts
+          path: {{workdir}}/bin/*.apk

@@ -1,0 +1,24 @@
+[project]
+name = "buildbix"
+version = "0.1.0"
+description = "BUILDBIX - Build anything, simply."
+license = {text = "Apache-2.0"}
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["alembic", "fastapi>=0.110", "uvicorn[standard]", "sqlalchemy>=2.0", "pyjwt", "python-multipart", "httpx", "cryptography"]
+
+[project.scripts]
+buildbix = "buildbix.cli:main"
+
+[tool.setuptools.package-data]
+buildbix = ["web/*"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["backend"]

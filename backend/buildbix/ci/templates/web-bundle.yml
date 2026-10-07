@@ -1,0 +1,25 @@
+# BUILDBIX CI template: web-bundle (v1)
+# STATUS: UNVERIFIED default
+# >>> REPLACE with a workflow you have run successfully on a real Vite/React project (keep the double-brace placeholders you want filled).
+name: BUILDBIX Web bundle
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "{{node_version}}"
+      - run: {{install_cmd}}
+        working-directory: {{workdir}}
+      - run: npm run build
+        working-directory: {{workdir}}
+      - run: tar -czf web-bundle.tar.gz -C {{out_dir}} .
+        working-directory: {{workdir}}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: buildbix-artifacts
+          path: {{workdir}}/web-bundle.tar.gz
