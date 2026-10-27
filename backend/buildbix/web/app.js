@@ -44,8 +44,16 @@ function renderAuth(app) {
   const pw = h("input", { type: "password", placeholder: "Password (10+ characters)", autocomplete: "current-password" });
   const box = h("div", { class: "card" }, h("h2", {}, "What do you want to build?"), h("div", { class: "muted" }, "Sign in to your workspace."));
   const go = (path) => guard(box, async () => {
-    const r = await (await api(path, { method: "POST", json: { email: email.value, password: pw.value } })).json();
-    S.token = r.access_token; S.email = r.user.email;
+    const emailValue = email.value.trim();
+    const passwordValue = pw.value;
+
+    if (!emailValue) throw new Error("Please enter your email.");
+    if (!passwordValue) throw new Error("Please enter your password.");
+    if (passwordValue.length < 10) throw new Error("Password must be at least 10 characters.");
+
+    const response = await api(path, { method: "POST", json: { email: emailValue, password: passwordValue } });
+    const user = await response.json();
+    S.token = user.access_token; S.email = user.user.email;
     sessionStorage.setItem("bbx_token", S.token); sessionStorage.setItem("bbx_email", S.email); render();
   });
   box.append(h("div", { class: "row" }, email, pw), h("div", { class: "row" },
@@ -74,13 +82,29 @@ async function renderBody() {
   const projects = await jget(`/workspaces/${S.ws}/projects`);
   const box = h("div", { class: "card" }, h("h2", {}, "Projects"));
   const file = h("input", { type: "file", accept: ".zip" }), pname = h("input", { placeholder: "Project name" });
+  const gitName = h("input", { placeholder: "Project name" });
+  const gitUrl = h("input", { placeholder: "https://github.com/owner/repo", style: "min-width:280px" });
+  const gitBranch = h("input", { placeholder: "Branch", value: "main", style: "width:100px" });
   box.append(h("table", {}, projects.map((p) => h("tr", {}, h("td", {}, p.name),
     h("td", { class: "muted" }, (p.analysis.frameworks || []).join(", ") || "-"),
     h("td", {}, h("button", { class: "sec", onclick: () => { S.project = p.id; renderProject(); } }, "Open"))))),
-    h("div", { class: "row" }, pname, file, h("button", { onclick: guard(box, async () => {
+        h("div", { class: "row" }, pname, file, h("button", { onclick: guard(box, async () => {
       const fd = new FormData(); fd.append("name", pname.value); fd.append("file", file.files[0]);
       const p = await (await api(`/workspaces/${S.ws}/projects`, { method: "POST", body: fd })).json();
-      S.project = p.id; renderBody(); }) }, "Import zip")));
+      S.project = p.id; renderBody(); }) }, "Import zip")),
+    h("div", { class: "row" }, gitName, gitUrl, gitBranch, h("button", { onclick: guard(box, async () => {
+      const projectName = gitName.value.trim();
+      const repoUrl = gitUrl.value.trim();
+      const branch = gitBranch.value.trim() || "main";
+
+      if (!projectName) throw new Error("Please enter a project name.");
+      if (!repoUrl) throw new Error("Please enter a GitHub repository URL.");
+      if (!repoUrl.startsWith("https://github.com/")) throw new Error("URL must start with https://github.com/");
+
+      const project = await jpost(`/workspaces/${S.ws}/projects/git`, { name: projectName, repo_url: repoUrl, branch: branch });
+      S.project = project.id;
+      renderBody();
+    }) }, "Import from GitHub")));
   body.append(box, h("div", { id: "project" }), h("div", { id: "activity", class: "card" }));
   if (S.project) renderProject();
   const act = await jget(`/workspaces/${S.ws}/activity?limit=8`);
