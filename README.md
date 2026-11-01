@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/buildbix-hero-concept.png" alt="BuildBix — concept artwork" width="100%">
+<img src="docs/assets/file_00000000ceac81f5a62e90eacc8c91eb.png" alt="BuildBix — concept artwork" width="100%">
 
 # BUILDBIX
 ### Build anything, simply.
