@@ -48,6 +48,8 @@ BuildBix is an AI-assisted cloud build platform designed to bring project import
 
 The current **MVP v0.1** includes a backend, a lightweight web dashboard, and a command-line interface (CLI). It is an early prototype: some integrations are represented by mocks in automated tests, and real-world build infrastructure still needs end-to-end verification.
 
+BuildBix is a product from Nexora-Techno
+
 ### Design goals
 
 - **One workflow:** import a project, inspect its build plan, start a build, and retrieve its artifacts.
